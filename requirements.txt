@@ -1,0 +1,26 @@
+# Faunari — Python dependencies (faunari conda env, Python 3.13)
+# Pinned to latest stable as of 2026-06-21.
+
+# Core
+python-dotenv==1.2.2
+requests==2.34.2
+
+# Jupyter
+ipykernel==7.3.0
+nbconvert==7.17.1
+nbclient==0.11.0
+
+# Data science / EDA
+numpy==2.4.6
+pandas==3.0.3
+matplotlib==3.11.0
+Pillow==12.2.0
+ImageHash==4.3.2
+opencv-python==4.13.0.92
+tqdm==4.68.3
+
+# Modeling (Phase 1 baseline)
+torch==2.12.1+cpu
+torchvision==0.27.1+cpu
+scikit-learn==1.9.0
+umap-learn==0.5.12

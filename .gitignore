@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Faunari data downloads — keep folder structure + manifests, ignore raw media
+data/raw/
+data/**/*.zip
+data/**/*.tar.gz
+!data/README.md
+!data/manifests/
+!data/manifests/**
