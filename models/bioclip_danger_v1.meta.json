@@ -1,0 +1,10 @@
+{
+  "backbone": "hf-hub:imageomics/bioclip",
+  "embedding_dim": 512,
+  "feature_variant": "raw",
+  "positive_class": "venomous",
+  "threshold": 0.0706,
+  "seed": 42,
+  "recall_test": 0.99,
+  "recall_hardcase": 0.935
+}

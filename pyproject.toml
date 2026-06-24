@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faunari"
+version = "0.1.0"
+description = "Faunari — safety-first dangerous-snake identification (prototype)."
+requires-python = ">=3.11"
+
+# Portable dependency groups (the Windows-ARM requirements.txt is the exact local lock; these
+# resolve cross-platform for CI/Docker). `test` deliberately excludes torch — the unit tests run
+# against Protocol fakes, so they need no heavy ML stack.
+[project.optional-dependencies]
+test = ["numpy", "pillow", "scikit-learn", "joblib", "pytest"]
+serve = ["streamlit", "torch", "torchvision", "open_clip_torch", "huggingface_hub",
+         "numpy", "scikit-learn", "joblib", "pillow"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+src = ["src", "tests"]

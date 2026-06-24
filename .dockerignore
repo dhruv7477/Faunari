@@ -1,0 +1,14 @@
+# Training-only / dev artifacts — keep the serving image lean.
+data/
+Trials/
+tests/
+docs/
+.git/
+.github/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.ipynb
+*.egg-info/
