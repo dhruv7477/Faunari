@@ -16,7 +16,11 @@ import os
 import sys
 from pathlib import Path
 
-META = Path(__file__).resolve().parents[1] / "models" / "bioclip_danger_v1.meta.json"
+_MODELS = Path(__file__).resolve().parents[1] / "models"
+# Gate the model that actually serves: prefer the fine-tuned v2 metadata when present.
+META = _MODELS / "bioclip_danger_v2.meta.json"
+if not META.exists():
+    META = _MODELS / "bioclip_danger_v1.meta.json"
 TEST_MIN = float(os.environ.get("GATE_TEST_MIN", "0.98"))
 HARDCASE_MIN = float(os.environ.get("GATE_HARDCASE_MIN", "0.90"))
 

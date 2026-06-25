@@ -33,6 +33,11 @@ huggingface_hub==1.20.1
 streamlit==1.58.0
 joblib==1.5.2
 
+# ONNX (faster CPU inference; onnx/onnxscript are export-only)
+onnxruntime==1.27.0
+onnx==1.22.0
+onnxscript==0.7.0
+
 # Tests
 pytest==9.1.1
 timm==1.0.27

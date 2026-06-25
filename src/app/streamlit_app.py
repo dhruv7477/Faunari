@@ -40,37 +40,50 @@ def render_verdict(verdict: Verdict) -> None:
         st.warning(banner)
 
 
+def _first_aid_columns() -> None:
+    """Render the DO / DON'T snakebite first-aid in two columns."""
+    col_do, col_dont = st.columns(2)
+    with col_do:
+        st.markdown("**DO**")
+        for item in content.DANGEROUS_FIRST_AID["do"]:
+            st.markdown(f"- {item}")
+    with col_dont:
+        st.markdown("**DON'T**")
+        for item in content.DANGEROUS_FIRST_AID["dont"]:
+            st.markdown(f"- {item}")
+
+
 def render_actions(verdict: Verdict) -> None:
-    """'What to do now' for confirmed-dangerous; re-shoot for OOD; distance note for low-risk."""
+    """Band-appropriate guidance: 'what to do now' (dangerous), 'if bitten' (caution), distance (low)."""
     if verdict.level is DangerLevel.UNIDENTIFIED:
         st.info("📷 Re-shoot the snake from a safe distance (zoom, don't approach). "
                 "If anyone was bitten, open the emergency panel above immediately.")
-        return
-    if verdict.treat_as_dangerous:
+    elif verdict.level is DangerLevel.DANGEROUS:
         st.subheader("🩹 What to do now")
         st.error(f"**{content.EMERGENCY['headline']}** — call 102 / 108.")
-        col_do, col_dont = st.columns(2)
-        with col_do:
-            st.markdown("**DO**")
-            for item in content.DANGEROUS_FIRST_AID["do"]:
-                st.markdown(f"- {item}")
-        with col_dont:
-            st.markdown("**DON'T**")
-            for item in content.DANGEROUS_FIRST_AID["dont"]:
-                st.markdown(f"- {item}")
-    else:
+        _first_aid_columns()
+    elif verdict.level is DangerLevel.CAUTION:
+        st.subheader("🩹 If bitten")
+        st.warning("Treat any snakebite as an emergency — get medical care immediately (102 / 108).")
+        _first_aid_columns()
+    else:  # LOW_RISK
         st.info(f"ℹ️ {content.LOW_RISK_NOTE}")
 
 
 def render_confidence(result: ScreenResult) -> None:
-    """Honest confidence display — calibrated P(venomous), or the OOD reason when gated out."""
+    """Plain-language confidence anchored to the everyday 50% intuition (no technical cut-off jargon)."""
     if result.prediction is None:
-        st.caption(f"Off-topic / unclear image (OOD score {result.ood.score:.1f} > "
-                   f"{result.ood.threshold:.1f}). No species verdict given — defaulting to caution.")
-    else:
-        pct = round(result.verdict.venom_probability * 100, 1)
-        st.caption(f"Model estimate: **{pct}%** venomous (calibrated). "
-                   "Low confidence defaults to *assume dangerous*.")
+        st.caption("Faunari couldn't confirm an in-scope snake in this photo, so it isn't guessing.")
+        return
+
+    pct = round(result.verdict.venom_probability * 100)
+    if result.verdict.level is DangerLevel.DANGEROUS:
+        st.caption(f"Faunari estimates a **high (~{pct}%)** chance this is venomous.")
+    elif result.verdict.level is DangerLevel.CAUTION:
+        st.caption(f"Faunari estimates **~{pct}%** chance of venom — more likely non-venomous, "
+                   "but not low enough to be sure. Stay cautious.")
+    else:  # LOW_RISK
+        st.caption(f"Faunari estimates a **low (~{pct}%)** chance of venom — but never treat any snake as safe.")
 
 
 def main() -> None:

@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 [project.optional-dependencies]
 test = ["numpy", "pillow", "scikit-learn", "joblib", "pytest"]
 serve = ["streamlit", "torch", "torchvision", "open_clip_torch", "huggingface_hub",
-         "numpy", "scikit-learn", "joblib", "pillow"]
+         "onnxruntime", "numpy", "scikit-learn", "joblib", "pillow"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

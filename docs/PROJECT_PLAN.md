@@ -79,8 +79,11 @@ downstream.
    - **Label normalisation needed**: GitHub `Non-Venomous` (hyphen) vs Kaggle `Non Venomous`
      (space) vs manifests (scientific names) → unify before merging.
    - **License filter before release**: iNat mostly `cc-by-nc` with ~24% blank.
-   - **Next targeted enhancement**: per-species iNat pulls for thin big-four classes + known
-     look-alikes (wolf snake, rat snake) to guarantee hard-case coverage.
+   - **Next targeted enhancement (APPROVED 2026-06-24)**: per-species iNat pulls for the big-four
+     misses — **krait, cobra, Russell's viper** + their look-alikes (wolf snake, rat snake) — to
+     raise venom **precision** so the v2 threshold can be dialed back from the current aggressive
+     0.0476 (which clears the gate at ~0.54 precision). One krait is a confident-zero miss → data,
+     not threshold, is the fix. Re-run the Kaggle fine-tune on the expanded set.
 
    **Executed EDA results (2026-06-21, `02_eda.ipynb` ran clean, 0 errors):** 5,823 images,
    0 corrupt (iNat 2,000 · kaggle 2,044 · github 1,779). Big-four well covered (Cobra 364,

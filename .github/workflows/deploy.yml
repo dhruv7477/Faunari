@@ -21,7 +21,7 @@ jobs:
         run: python scripts/check_release_gate.py
         env:
           GATE_TEST_MIN: "0.98"
-          GATE_HARDCASE_MIN: "0.90"   # PROTOTYPE bar — raise to 0.98 for production
+          GATE_HARDCASE_MIN: "0.98"   # production bar — met by fine-tuned v2 (test 0.998 / hardcase 0.984)
 
   build-and-push:
     name: Build & push image

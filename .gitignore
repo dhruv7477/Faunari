@@ -224,3 +224,9 @@ data/**/*.tar.gz
 !data/README.md
 !data/manifests/
 !data/manifests/**
+
+# Large model weights (fine-tuned encoder ~600 MB) + build artifacts — distribute via release storage
+*.pt
+*.onnx
+*.onnx.data
+dist/
