@@ -40,8 +40,11 @@ IDX_CACHE = PROCESSED_DIR / "embeddings_bioclip_v2_index.csv"
 
 
 def load_labels() -> pd.DataFrame:
-    """master_index + conservative override (needs_review species -> venomous)."""
-    df = pd.read_csv(PROCESSED_DIR / "master_index.csv")
+    """Expanded master_index (if present) + conservative override (needs_review species -> venomous)."""
+    expanded = PROCESSED_DIR / "master_index_expanded.csv"
+    src = expanded if expanded.exists() else PROCESSED_DIR / "master_index.csv"
+    print(f"[labels] using {src.name}")
+    df = pd.read_csv(src)
     vmap = pd.read_csv(TAXONOMY_DIR / "species_venom_map.csv")
     review = set(vmap.loc[vmap["needs_review"] == True, "scientific_name"])  # noqa: E712
     df.loc[df["species"].isin(review), "venom_label"] = POSITIVE_CLASS
