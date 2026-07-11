@@ -13,10 +13,10 @@ export interface Screener {
 }
 
 export class MockScreener implements Screener {
-  constructor(private readonly threshold = 0.0574) {}
+  constructor(private readonly threshold = 0.0574, private readonly delayMs = 600) {}
 
   async screen(_imageUri: string): Promise<ScreenResult> {
-    await new Promise((r) => setTimeout(r, 600)); // simulate inference latency
+    await new Promise((r) => setTimeout(r, this.delayMs)); // simulate inference latency
     const isOod = Math.random() < 0.1;
     const ood = { isOod, score: isOod ? 40 : 20, threshold: 30 };
     if (isOod) {
