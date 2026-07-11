@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Faunari",
+    "slug": "faunari",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": { "backgroundColor": "#15301F" },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.faunari.app",
+      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"]
+    },
+    "plugins": ["expo-image-picker"]
+  }
+}
