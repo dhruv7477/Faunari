@@ -230,3 +230,23 @@ data/**/*.tar.gz
 *.onnx
 *.onnx.data
 dist/
+
+# Derived / regenerable data artifacts — the pipeline recreates these. Kept (tracked): the canonical
+# data/processed/master_index.csv, data/manifests/*.csv (license provenance), data/taxonomy/*.csv.
+data/processed/*.npy
+data/processed/embeddings_*_index.csv
+data/processed/master_index_expanded.csv
+data/processed/kaggle_index.csv
+data/processed/dedup_split_summary.txt
+
+# Frontend (React / Node) — for the upcoming React app
+node_modules/
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+.vite/
+.expo/
