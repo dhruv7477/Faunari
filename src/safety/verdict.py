@@ -25,9 +25,9 @@ def verdict_for_prediction(pred: Prediction) -> Verdict:
         )
     if p >= t:
         return Verdict(
-            DangerLevel.CAUTION, "⚠️", "Probably non-venomous — but stay cautious",
-            "More likely a non-venomous snake, but Faunari can't be sure. Never approach, handle, or "
-            "corner any snake — and if anyone is bitten, treat it as an emergency and get medical care.",
+            DangerLevel.CAUTION, "⚠️", "Best treated with caution — keep clear",
+            "Some signs of risk, but no confident venom match. Stay back, don't corner or handle it, "
+            "and seek medical help immediately if bitten.",
             treat_as_dangerous=True, venom_probability=p,
         )
     return Verdict(

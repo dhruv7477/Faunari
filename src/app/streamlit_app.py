@@ -80,8 +80,8 @@ def render_confidence(result: ScreenResult) -> None:
     if result.verdict.level is DangerLevel.DANGEROUS:
         st.caption(f"Faunari estimates a **high (~{pct}%)** chance this is venomous.")
     elif result.verdict.level is DangerLevel.CAUTION:
-        st.caption(f"Faunari estimates **~{pct}%** chance of venom — more likely non-venomous, "
-                   "but not low enough to be sure. Stay cautious.")
+        st.caption(f"Faunari estimates **~{pct}%** chance of venom — not a confident match, "
+                   "but not low enough to rule out. Treat it with caution.")
     else:  # LOW_RISK
         st.caption(f"Faunari estimates a **low (~{pct}%)** chance of venom — but never treat any snake as safe.")
 

@@ -14,11 +14,14 @@ def test_high_prob_is_dangerous():
 
 
 def test_above_threshold_below_half_is_caution():
-    """5%-50% venom -> 'probably non-venomous, but stay cautious' (still shows first-aid)."""
+    """Above threshold but <50% -> 'best treated with caution' (careful but never says safe)."""
     v = verdict_for_prediction(Prediction(0.20, THRESHOLD))
     assert v.level is DangerLevel.CAUTION
     assert v.treat_as_dangerous is True
-    assert "never approach" in v.subtext.lower()  # never-say-safe behaviour preserved
+    sub = v.subtext.lower()
+    assert "keep clear" in v.headline.lower() or "caution" in v.headline.lower()
+    assert "handle" in sub and "medical" in sub          # keeps don't-handle + seek-care
+    assert "non-venomous" not in sub                      # must NOT falsely reassure
 
 
 def test_at_threshold_is_caution():
