@@ -5,14 +5,23 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "splash": { "backgroundColor": "#15301F" },
-    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "backgroundColor": "#15301F"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "package": "com.faunari.app",
       "versionCode": 1,
-      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"]
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
+      "./plugins/withOrtVersionPin",
       "expo-dev-client",
       [
         "expo-image-picker",
@@ -21,6 +30,12 @@
           "photosPermission": "Faunari needs photo access to check a snake photo you already took."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1310584b-7038-449e-a494-251d9a1de414"
+      }
+    },
+    "owner": "dhruv7477"
   }
 }
