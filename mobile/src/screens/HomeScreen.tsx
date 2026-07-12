@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -18,7 +18,8 @@ import {
   LOW_RISK_NOTE,
 } from "../safety/content";
 import { DangerLevel, ScreenResult, Verdict } from "../safety/types";
-import { MockScreener } from "../screener/screener";
+import { createScreener } from "../screener/createScreener";
+import { MockScreener, Screener } from "../screener/screener";
 
 const BAND = {
   [DangerLevel.DANGEROUS]: { bg: "#FBE9E6", fg: "#B5341F" },
@@ -28,17 +29,28 @@ const BAND = {
 } as const;
 
 export default function HomeScreen() {
-  const screener = useMemo(() => new MockScreener(), []);
+  // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
+  const screenerRef = useRef<Screener>(new MockScreener());
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    createScreener().then(({ screener }) => {
+      if (!cancelled) screenerRef.current = screener;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const analyze = async (uri: string) => {
     setLoading(true);
     setResult(null);
     try {
-      setResult(await screener.screen(uri));
+      setResult(await screenerRef.current.screen(uri));
     } finally {
       setLoading(false);
     }

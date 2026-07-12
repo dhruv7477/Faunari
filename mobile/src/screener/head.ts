@@ -18,6 +18,13 @@ export interface Ood {
   threshold: number;
 }
 
+export interface Meta {
+  backbone: string;
+  embeddingDim: number;
+  preprocess: { size: number; mean: number[]; std: number[] };
+  positiveClass: string;
+}
+
 export function standardize(x: number[], mean: number[], scale: number[]): number[] {
   return x.map((v, i) => (v - mean[i]) / scale[i]);
 }
