@@ -13,7 +13,7 @@ export interface ScreenerHandle {
   mode: "onnx" | "mock";
 }
 
-/** Ensure the encoder files are cached locally; returns the .onnx path, or null if not configured. */
+/** Ensure the model files are cached locally; returns the model dir (trailing slash) or null. */
 async function ensureModel(): Promise<string | null> {
   if (!MODEL_BASE_URL) return null;
   const dir = `${FileSystem.documentDirectory}model/`;
@@ -26,24 +26,25 @@ async function ensureModel(): Promise<string | null> {
       await FileSystem.downloadAsync(`${base}/${name}`, dest);
     }
   }
-  return `${dir}${MODEL_FILES[0]}`;
+  return dir;
 }
 
 export async function createScreener(): Promise<ScreenerHandle> {
   try {
-    const modelPath = await ensureModel();
-    if (!modelPath) return { screener: new MockScreener(), mode: "mock" };
-    // Import lazily so Expo Go (no native onnxruntime) never loads it.
-    const [{ OnnxScreener }, head, ood, meta] = await Promise.all([
+    const dir = await ensureModel();
+    if (!dir) return { screener: new MockScreener(), mode: "mock" };
+    // Import lazily so Expo Go (no native onnxruntime) never loads it. head/meta are bundled JSON;
+    // ood is read from the downloaded file to keep it out of the bundle.
+    const [{ OnnxScreener }, head, meta, oodRaw] = await Promise.all([
       import("./onnxScreener"),
       import("../../assets/model/head.json"),
-      import("../../assets/model/ood.json"),
       import("../../assets/model/meta.json"),
+      FileSystem.readAsStringAsync(`${dir}ood.json`),
     ]);
     const screener = await OnnxScreener.create(
-      modelPath,
+      `${dir}${MODEL_FILES[0]}`,
       head.default as Head,
-      ood.default as unknown as Ood,
+      JSON.parse(oodRaw) as Ood,
       meta.default as Meta,
     );
     return { screener, mode: "onnx" };

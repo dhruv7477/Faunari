@@ -9,5 +9,7 @@
 // MockScreener and never touches onnxruntime.
 export const MODEL_BASE_URL: string = ""; // e.g. "https://github.com/dhruv7477/Faunari/releases/download/model-v2"
 
-// Downloaded in order; the first entry is the .onnx graph, the rest are its external-weight shards.
-export const MODEL_FILES = ["bioclip_encoder.onnx", "bioclip_encoder.onnx.data"];
+// Downloaded together and versioned with the model: the .onnx graph, its external-weight shard,
+// and ood.json (5 MB Mahalanobis params). Kept out of the JS bundle so the app/APK stays small and
+// the cloud build never depends on gitignored files. head.json / meta.json are small and bundled.
+export const MODEL_FILES = ["bioclip_encoder.onnx", "bioclip_encoder.onnx.data", "ood.json"];

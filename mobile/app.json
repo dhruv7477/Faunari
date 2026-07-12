@@ -9,8 +9,18 @@
     "assetBundlePatterns": ["**/*"],
     "android": {
       "package": "com.faunari.app",
+      "versionCode": 1,
       "permissions": ["CAMERA", "READ_MEDIA_IMAGES"]
     },
-    "plugins": ["expo-image-picker"]
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Faunari uses the camera so you can photograph a snake from a safe distance.",
+          "photosPermission": "Faunari needs photo access to check a snake photo you already took."
+        }
+      ]
+    ]
   }
 }
