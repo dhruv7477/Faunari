@@ -4,14 +4,16 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "web": "expo start --web",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "expo": "~52.0.0",
+    "expo-build-properties": "~0.13.3",
     "expo-dev-client": "~5.0.20",
     "expo-file-system": "~18.0.4",
     "expo-image-manipulator": "~13.0.5",
