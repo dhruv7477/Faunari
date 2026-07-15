@@ -22,6 +22,7 @@
     },
     "plugins": [
       "./plugins/withOrtVersionPin",
+      "./plugins/withAndroidAbis",
       "expo-dev-client",
       [
         "expo-image-picker",
@@ -41,7 +42,10 @@
                 "lib/**/libc++_shared.so",
                 "lib/**/libfbjni.so"
               ]
-            }
+            },
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keep class ai.onnxruntime.** { *; }"
           }
         }
       ],
