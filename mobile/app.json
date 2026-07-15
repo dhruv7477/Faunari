@@ -4,7 +4,7 @@
     "slug": "faunari",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#15301F"
     },
@@ -44,7 +44,8 @@
             }
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {
