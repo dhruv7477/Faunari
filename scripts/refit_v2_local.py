@@ -16,7 +16,6 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-import torch
 from PIL import Image, ImageFile
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.frozen import FrozenEstimator
@@ -59,6 +58,7 @@ def embed_all(df: pd.DataFrame, batch: int = 32) -> np.ndarray:
             print(f"[cache] {EMB_CACHE.name}")
             return np.load(EMB_CACHE)
     import open_clip
+    import torch  # heavy; only needed for embedding extraction, keeps helpers importable without it
 
     model, _, preprocess = open_clip.create_model_and_transforms(BACKBONE_ID)
     model.load_state_dict(torch.load(FINETUNED_WEIGHTS, map_location="cpu"))

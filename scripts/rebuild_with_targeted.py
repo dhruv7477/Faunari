@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import imagehash
 import numpy as np
 import pandas as pd
 from PIL import Image, ImageFile
@@ -32,6 +31,8 @@ def to_rel(path: str) -> str:
 
 
 def phash_int(path: str) -> int | None:
+    import imagehash  # only needed when hashing images, keeps helpers importable without it
+
     try:
         with Image.open(path) as im:
             return int(str(imagehash.phash(im.convert("RGB"))), 16)
