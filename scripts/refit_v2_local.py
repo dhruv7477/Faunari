@@ -90,7 +90,8 @@ def split_mask(df: pd.DataFrame, s: str) -> np.ndarray:
 
 def recall_precision(y: np.ndarray, p: np.ndarray, thr: float) -> tuple[float, float]:
     pred = (p >= thr).astype(int)
-    tp = int(((pred == 1) & (y == 1)).sum()); fn = int(((pred == 0) & (y == 1)).sum())
+    tp = int(((pred == 1) & (y == 1)).sum())
+    fn = int(((pred == 0) & (y == 1)).sum())
     fp = int(((pred == 1) & (y == 0)).sum())
     rec = tp / (tp + fn) if (tp + fn) else 0.0
     prec = tp / (tp + fp) if (tp + fp) else 0.0
