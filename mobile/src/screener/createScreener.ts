@@ -6,7 +6,7 @@ import * as FileSystem from "expo-file-system";
 
 import { Head, Meta, Ood } from "./head";
 import { MockScreener, Screener } from "./screener";
-import { MODEL_BASE_URL, MODEL_FILES } from "./config";
+import { MODEL_AUTH_TOKEN, MODEL_BASE_URL, MODEL_FILES } from "./config";
 
 export interface ScreenerHandle {
   screener: Screener;
@@ -19,11 +19,16 @@ async function ensureModel(): Promise<string | null> {
   const dir = `${FileSystem.documentDirectory}model/`;
   await FileSystem.makeDirectoryAsync(dir, { intermediates: true }).catch(() => undefined);
   const base = MODEL_BASE_URL.replace(/\/$/, "");
+  // Private hosts (e.g. Hugging Face) need a bearer token; they redirect to a pre-signed CDN URL,
+  // so the header is only needed on the first hop.
+  const options = MODEL_AUTH_TOKEN
+    ? { headers: { Authorization: `Bearer ${MODEL_AUTH_TOKEN}` } }
+    : undefined;
   for (const name of MODEL_FILES) {
     const dest = `${dir}${name}`;
     const info = await FileSystem.getInfoAsync(dest);
     if (!info.exists) {
-      await FileSystem.downloadAsync(`${base}/${name}`, dest);
+      await FileSystem.downloadAsync(`${base}/${name}`, dest, options);
     }
   }
   return dir;
