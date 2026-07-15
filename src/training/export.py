@@ -83,7 +83,8 @@ def build() -> None:
 
     def recall_at(Xs: np.ndarray, ys: np.ndarray) -> float:
         pred = (calibrated.predict_proba(Xs)[:, 1] >= threshold).astype(int)
-        tp = int(((pred == 1) & (ys == 1)).sum()); fn = int(((pred == 0) & (ys == 1)).sum())
+        tp = int(((pred == 1) & (ys == 1)).sum())
+        fn = int(((pred == 0) & (ys == 1)).sum())
         return round(tp / (tp + fn), 3) if (tp + fn) else 0.0
 
     meta = {

@@ -12,7 +12,7 @@ requires-python = ">=3.11"
 # resolve cross-platform for CI/Docker). `test` deliberately excludes torch — the unit tests run
 # against Protocol fakes, so they need no heavy ML stack.
 [project.optional-dependencies]
-test = ["numpy", "pillow", "scikit-learn", "joblib", "pytest"]
+test = ["numpy", "pillow", "scikit-learn", "joblib", "pytest", "pandas"]
 serve = ["streamlit", "torch", "torchvision", "open_clip_torch", "huggingface_hub",
          "onnxruntime", "numpy", "scikit-learn", "joblib", "pillow"]
 
