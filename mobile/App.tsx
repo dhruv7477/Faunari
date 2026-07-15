@@ -11,5 +11,5 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F7F4EC" },
+  root: { flex: 1, backgroundColor: "#123524" },
 });
