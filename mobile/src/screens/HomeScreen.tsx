@@ -96,7 +96,10 @@ export default function HomeScreen() {
       <StatusBar style="light" />
 
       <View style={styles.header}>
-        <Text style={styles.brand}>🐍 Faunari</Text>
+        <View style={styles.brandRow}>
+          <Image source={require("../../assets/logo.png")} style={styles.logo} />
+          <Text style={styles.brand}>Faunari</Text>
+        </View>
         <Text style={styles.tagline}>Spot it. Know it. Stay safe.</Text>
         {mode === "mock" && (
           <View style={styles.demoPill}>
@@ -172,7 +175,7 @@ export default function HomeScreen() {
 
         {result && !loading && <Result result={result} />}
 
-        <Text style={styles.disclaimer}>{DISCLAIMER}</Text>
+        <Text style={[styles.disclaimer, { marginTop: "auto" }]}>{DISCLAIMER}</Text>
       </View>
     </ScrollView>
   );
@@ -274,8 +277,8 @@ function Actions({ verdict }: { verdict: Verdict }) {
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: PALETTE.forestDeep },
-  content: { paddingBottom: 48 },
+  page: { flex: 1, backgroundColor: PALETTE.forest },
+  content: { flexGrow: 1 },
 
   header: {
     backgroundColor: PALETTE.forest,
@@ -283,6 +286,8 @@ const styles = StyleSheet.create({
     paddingBottom: 26,
     paddingHorizontal: 22,
   },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  logo: { width: 44, height: 44 },
   brand: { fontSize: 32, fontWeight: "800", color: "#FFFFFF", letterSpacing: 0.3 },
   tagline: { color: "#BCD3C3", marginTop: 3, fontSize: 14.5 },
   demoPill: {
@@ -296,11 +301,13 @@ const styles = StyleSheet.create({
   demoPillText: { color: "#E8F1EA", fontSize: 12.5, fontWeight: "600" },
 
   body: {
+    flex: 1, // stretch the light panel to the bottom so no dark gap shows below short content
     backgroundColor: PALETTE.sand,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     marginTop: -14,
     padding: 18,
+    paddingBottom: 28,
     gap: 14,
   },
 
