@@ -90,9 +90,13 @@ export default function HomeScreen() {
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) return;
+    // allowsEditing: after capture the user drags a crop box around the snake — so a photo taken
+    // from a safe distance still fills the frame with snake (matches training framing; keeps the
+    // OOD gate from rejecting distant shots). Square crop mirrors the model's own center-crop.
+    const opts = { quality: 0.7, allowsEditing: true, aspect: [1, 1] as [number, number] };
     const res = useCamera
-      ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
-      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.7 });
+      ? await ImagePicker.launchCameraAsync(opts)
+      : await ImagePicker.launchImageLibraryAsync({ ...opts, mediaTypes: ["images"] });
     if (!res.canceled) {
       setImageUri(res.assets[0].uri);
       analyze(res.assets[0].uri);
@@ -144,7 +148,8 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>Check a snake</Text>
           <View style={styles.hintChip}>
             <Text style={styles.hintChipText}>
-              📏 Stay well back and zoom in — never move closer for a better photo.
+              📏 Stay well back and zoom in — never move closer for a better photo. After shooting,
+              crop tightly around the snake so it fills the frame.
             </Text>
           </View>
 
