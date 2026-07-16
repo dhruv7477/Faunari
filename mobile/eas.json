@@ -13,11 +13,13 @@
     "preview": {
       "distribution": "internal",
       "android": { "buildType": "apk" },
-      "env": { "ANDROID_ABIS": "arm64-v8a" }
+      "env": { "ANDROID_ABIS": "arm64-v8a" },
+      "environment": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "android": { "buildType": "app-bundle" }
+      "android": { "buildType": "app-bundle" },
+      "environment": "production"
     }
   },
   "submit": {
