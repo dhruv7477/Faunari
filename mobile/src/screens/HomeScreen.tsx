@@ -20,6 +20,11 @@ import {
 import { DangerLevel, ScreenResult, Verdict } from "../safety/types";
 import { createScreener } from "../screener/createScreener";
 import { MockScreener, Screener } from "../screener/screener";
+import { buildFeedbackRecord } from "../feedback/record";
+import { LocalFeedbackStore } from "../feedback/localStore";
+import { FeedbackSink, UserClaim } from "../feedback/types";
+
+const APP_VERSION = "0.1.0";
 
 const PALETTE = {
   forest: "#123524",
@@ -48,6 +53,7 @@ const BAND = {
 export default function HomeScreen() {
   // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
   const screenerRef = useRef<Screener>(new MockScreener());
+  const feedbackRef = useRef<FeedbackSink>(new LocalFeedbackStore());
   const [mode, setMode] = useState<"onnx" | "mock">("mock");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
@@ -173,7 +179,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {result && !loading && <Result result={result} />}
+        {result && !loading && imageUri && (
+          <Result result={result} imageUri={imageUri} sink={feedbackRef.current} />
+        )}
 
         <Text style={[styles.disclaimer, { marginTop: "auto" }]}>{DISCLAIMER}</Text>
       </View>
@@ -181,7 +189,15 @@ export default function HomeScreen() {
   );
 }
 
-function Result({ result }: { result: ScreenResult }) {
+function Result({
+  result,
+  imageUri,
+  sink,
+}: {
+  result: ScreenResult;
+  imageUri: string;
+  sink: FeedbackSink;
+}) {
   const v = result.verdict;
   const band = BAND[v.level];
   return (
@@ -200,7 +216,77 @@ function Result({ result }: { result: ScreenResult }) {
         <Confidence result={result} color={band.fg} />
       </View>
       <Actions verdict={v} />
+      <FeedbackPrompt result={result} imageUri={imageUri} sink={sink} />
     </View>
+  );
+}
+
+function FeedbackPrompt({
+  result,
+  imageUri,
+  sink,
+}: {
+  result: ScreenResult;
+  imageUri: string;
+  sink: FeedbackSink;
+}) {
+  const [step, setStep] = useState<"ask" | "dispute" | "done">("ask");
+
+  const send = async (claim: UserClaim) => {
+    setStep("done"); // optimistic — a dropped feedback should never block the user
+    try {
+      await sink.submit(buildFeedbackRecord(imageUri, result, claim, APP_VERSION));
+    } catch {
+      // stored best-effort; nothing user-facing to do
+    }
+  };
+
+  if (step === "done") {
+    return (
+      <View style={styles.feedbackCard}>
+        <Text style={styles.feedbackThanks}>🙏 Thanks — your feedback helps Faunari improve.</Text>
+      </View>
+    );
+  }
+
+  if (step === "dispute") {
+    return (
+      <View style={styles.feedbackCard}>
+        <Text style={styles.feedbackQ}>What was it, really?</Text>
+        <FeedbackBtn label="It was actually harmless" onPress={() => send("actually_harmless")} />
+        <FeedbackBtn label="It was actually dangerous" onPress={() => send("actually_dangerous")} />
+        <FeedbackBtn label="It wasn't a snake" onPress={() => send("not_a_snake")} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.feedbackCard}>
+      <Text style={styles.feedbackQ}>Was this helpful?</Text>
+      <View style={styles.feedbackRow}>
+        <FeedbackBtn label="👍  Looks right" onPress={() => send("agree")} grow />
+        <FeedbackBtn label="👎  Not quite" onPress={() => setStep("dispute")} grow />
+      </View>
+    </View>
+  );
+}
+
+function FeedbackBtn({
+  label,
+  onPress,
+  grow,
+}: {
+  label: string;
+  onPress: () => void;
+  grow?: boolean;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.feedbackBtn, grow && { flex: 1 }, pressed && styles.pressed]}
+      onPress={onPress}
+    >
+      <Text style={styles.feedbackBtnText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -435,4 +521,27 @@ const styles = StyleSheet.create({
   bullet: { color: "#333F38", lineHeight: 22, marginBottom: 4, fontSize: 14.5 },
 
   disclaimer: { color: PALETTE.muted, fontSize: 12.5, lineHeight: 18, paddingHorizontal: 4 },
+
+  feedbackCard: {
+    backgroundColor: PALETTE.card,
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 2,
+    borderWidth: 1,
+    borderColor: PALETTE.line,
+  },
+  feedbackQ: { fontSize: 14.5, fontWeight: "700", color: PALETTE.ink, marginBottom: 10 },
+  feedbackRow: { flexDirection: "row", gap: 10 },
+  feedbackBtn: {
+    borderWidth: 1.5,
+    borderColor: PALETTE.line,
+    borderRadius: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    marginBottom: 8,
+    backgroundColor: "#FAFCFA",
+  },
+  feedbackBtnText: { color: PALETTE.ink, fontWeight: "600", fontSize: 14 },
+  feedbackThanks: { color: PALETTE.green, fontWeight: "600", fontSize: 14 },
 });
