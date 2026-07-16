@@ -67,11 +67,12 @@ the Python model by `scripts/export_mobile_model.py` (golden `selftest.json`, ma
 ## Roadmap
 
 - **Phase 1 (done):** app scaffold, safety UX, verdict/first-aid logic, camera/upload, mock inference.
-- **Phase 1b — on-device inference (code done; device validation pending):**
-  `onnxruntime-react-native` running a fresh ONNX export of the fine-tuned BioCLIP encoder + the
-  calibrated head & OOD params + the ported `verdict` logic — fully offline. Inference math is
-  Python-verified; remaining is a device build (EAS, above), then set `MODEL_BASE_URL` for real
-  inference and validate one image's probability against Python. NNAPI/NPU is a later speed tweak.
+- **Phase 1b — on-device inference (done ✓):** `onnxruntime-react-native` running a fresh ONNX
+  export of the fine-tuned BioCLIP encoder + the calibrated head & OOD params + the ported `verdict`
+  logic — fully offline, NNAPI-accelerated. **Device-validated:** a 6-image parity test matched the
+  served Python model's verdict on every image (venom probabilities within a couple %). Known
+  follow-up: encoder latency (~3.5–6.7 s/photo) is above the ≤2 s target — int8 quantization or a
+  distilled backbone is the fix, deferred as acceptable for the prototype.
 - **Phase 2 — feedback flywheel:** a "Was this right?" capture → candidate store → verification
   (auto filter → consensus → asymmetric/expert review) → email trigger after N feedbacks → your
   personal review → retrain → **release gate** → OTA model update. (LLM-assisted review later.)
