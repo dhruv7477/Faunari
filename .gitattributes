@@ -1,0 +1,7 @@
+# GitHub Linguist overrides — make the repo's language bar reflect the application code
+# (Python + TypeScript), not the large exploratory notebooks under Trials/.
+Trials/** linguist-documentation
+*.ipynb linguist-documentation
+
+# Keep model-parameter JSON out of language stats (generated, not hand-written source).
+mobile/assets/model/** linguist-generated
