@@ -27,15 +27,20 @@ class FakeUploader implements FeedbackUploader {
 describe("toFirestore payload", () => {
   it("flattens the record and defaults verified=false", () => {
     const rec = buildFeedbackRecord("a.jpg", result(), "actually_harmless", "0.1.0");
-    const doc = toFirestore(rec, "https://cdn/x.jpg");
+    const doc = toFirestore(rec, "b64data");
     expect(doc).toMatchObject({
       claim: "actually_harmless",
       level: DangerLevel.DANGEROUS,
       venomProbability: 0.8,
       threshold: 0.0574,
-      imageUrl: "https://cdn/x.jpg",
+      imageBase64: "b64data",
       verified: false,
     });
+  });
+
+  it("keeps the record uploadable when the photo could not be compressed", () => {
+    const rec = buildFeedbackRecord("a.jpg", result(), "agree", "0.1.0");
+    expect(toFirestore(rec, null).imageBase64).toBeNull();
   });
 });
 
