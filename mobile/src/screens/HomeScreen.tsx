@@ -215,8 +215,8 @@ function Result({
         <Text style={styles.verdictSub}>{v.subtext}</Text>
         <Confidence result={result} color={band.fg} />
       </View>
-      <Actions verdict={v} />
       <FeedbackPrompt result={result} imageUri={imageUri} sink={sink} />
+      <Actions verdict={v} />
     </View>
   );
 }
@@ -527,6 +527,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginTop: 2,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: PALETTE.line,
   },
