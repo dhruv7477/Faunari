@@ -49,4 +49,10 @@ export class LocalFeedbackStore implements FeedbackSink {
   async count(): Promise<number> {
     return (await this.readQueue()).length;
   }
+
+  async markSynced(ids: string[]): Promise<void> {
+    const set = new Set(ids);
+    const queue = (await this.readQueue()).map((r) => (set.has(r.id) ? { ...r, synced: true } : r));
+    await FileSystem.writeAsStringAsync(this.queue, JSON.stringify(queue));
+  }
 }

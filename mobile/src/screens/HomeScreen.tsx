@@ -21,7 +21,7 @@ import { DangerLevel, ScreenResult, Verdict } from "../safety/types";
 import { createScreener } from "../screener/createScreener";
 import { MockScreener, Screener } from "../screener/screener";
 import { buildFeedbackRecord } from "../feedback/record";
-import { LocalFeedbackStore } from "../feedback/localStore";
+import { createFeedbackStore, syncFeedback } from "../feedback/createFeedback";
 import { FeedbackSink, UserClaim } from "../feedback/types";
 
 const APP_VERSION = "0.1.0";
@@ -53,7 +53,7 @@ const BAND = {
 export default function HomeScreen() {
   // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
   const screenerRef = useRef<Screener>(new MockScreener());
-  const feedbackRef = useRef<FeedbackSink>(new LocalFeedbackStore());
+  const feedbackRef = useRef<FeedbackSink>(createFeedbackStore());
   const [mode, setMode] = useState<"onnx" | "mock">("mock");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
@@ -68,6 +68,8 @@ export default function HomeScreen() {
         setMode(m);
       }
     });
+    // Drain any feedback queued offline in a previous session.
+    syncFeedback(feedbackRef.current).catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -236,6 +238,7 @@ function FeedbackPrompt({
     setStep("done"); // optimistic — a dropped feedback should never block the user
     try {
       await sink.submit(buildFeedbackRecord(imageUri, result, claim, APP_VERSION));
+      syncFeedback(sink).catch(() => undefined); // best-effort upload; queue retries otherwise
     } catch {
       // stored best-effort; nothing user-facing to do
     }

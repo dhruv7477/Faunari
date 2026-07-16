@@ -36,4 +36,11 @@ export interface FeedbackSink {
   submit(record: FeedbackRecord): Promise<void>;
   pending(): Promise<FeedbackRecord[]>; // not-yet-synced records
   count(): Promise<number>; // total captured (drives the "email at 100" trigger later)
+  markSynced(ids: string[]): Promise<void>; // flag records the uploader has pushed to the backend
+}
+
+/** Uploads one record to the backend (Firebase in 2b). Kept separate from the local queue so the
+ *  offline-first flow is: capture locally → best-effort upload → mark synced on success. */
+export interface FeedbackUploader {
+  upload(record: FeedbackRecord): Promise<void>;
 }

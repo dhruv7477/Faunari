@@ -16,4 +16,11 @@ export class MemoryFeedbackStore implements FeedbackSink {
   async count(): Promise<number> {
     return this.records.length;
   }
+
+  async markSynced(ids: string[]): Promise<void> {
+    const set = new Set(ids);
+    for (const r of this.records) {
+      if (set.has(r.id)) r.synced = true;
+    }
+  }
 }
