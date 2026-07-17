@@ -60,7 +60,7 @@ export const en = {
   emergency: {
     headline: "Seek medical care NOW",
     steps: [
-      "Call emergency services immediately — in India, 102 or 108 for an ambulance.",
+      "Call emergency services immediately — dial {ambulance} for an ambulance.",
       "Get to the nearest hospital with antivenom as fast as safely possible.",
       "Keep the person calm and as still as possible; reassure them.",
       "Note the time of the bite and any changing symptoms to tell the clinician.",
@@ -70,15 +70,15 @@ export const en = {
   firstAid: {
     titleNow: "What to do now",
     titleIfBitten: "If bitten",
-    emphasisDanger: "Seek medical care NOW — call 102 / 108.",
-    emphasisCaution: "Treat any snakebite as an emergency — get medical care immediately (102 / 108).",
+    emphasisDanger: "Seek medical care NOW — call {ambulance}.",
+    emphasisCaution: "Treat any snakebite as an emergency — get medical care immediately ({ambulance}).",
     doLabel: "DO",
     dontLabel: "DON'T",
     do: [
       "Move everyone away from the snake to a safe distance.",
       "Keep the bitten person calm and still — movement spreads venom faster.",
       "Keep the bitten limb still and roughly at heart level; remove rings, watches, tight clothing.",
-      "Get to a hospital with antivenom immediately; call 102 / 108.",
+      "Get to a hospital with antivenom immediately; call {ambulance}.",
     ],
     dont: [
       "Do NOT cut, suck, or try to drain the wound.",

@@ -19,6 +19,7 @@ import { buildFeedbackRecord } from "../feedback/record";
 import { createFeedbackStore, syncFeedback } from "../feedback/createFeedback";
 import { FeedbackSink, UserClaim } from "../feedback/types";
 import { availableLocales, fmt, isReviewed, s } from "../i18n";
+import { ambulanceNumber, countryOptions, flagEmoji } from "../i18n/emergency";
 import { useLocale } from "../i18n/LocaleContext";
 
 const APP_VERSION = "0.1.0";
@@ -58,7 +59,7 @@ export default function HomeScreen() {
   // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
   const screenerRef = useRef<Screener>(new MockScreener());
   const feedbackRef = useRef<FeedbackSink>(createFeedbackStore());
-  const { locale, changeLocale, needsRestart } = useLocale();
+  const { locale, changeLocale, country, changeCountry, needsRestart } = useLocale();
   const [mode, setMode] = useState<"onnx" | "mock">("mock");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
@@ -158,7 +159,7 @@ export default function HomeScreen() {
             <Text style={[styles.cardTitle, { color: PALETTE.red }]}>{t.emergency.headline}</Text>
             {t.emergency.steps.map((step, i) => (
               <Text key={i} style={styles.bullet}>
-                <Text style={{ color: PALETTE.red }}>●</Text>  {step}
+                <Text style={{ color: PALETTE.red }}>●</Text>  {fmt(step, { ambulance: ambulanceNumber() })}
               </Text>
             ))}
           </View>
@@ -224,13 +225,43 @@ export default function HomeScreen() {
                 ]}
                 onPress={async () => {
                   await changeLocale(l.code);
-                  setPickerOpen(false);
                 }}
               >
                 <Text style={styles.langRowText}>{l.nativeName}</Text>
                 {locale === l.code && <Text style={{ color: PALETTE.green }}>✓</Text>}
               </Pressable>
             ))}
+
+            <Text style={[styles.cardTitle, { marginTop: 16 }]}>
+              🚑 {flagEmoji(country ?? "")} {ambulanceNumber()}
+            </Text>
+            <ScrollView style={styles.countryList} nestedScrollEnabled>
+              {countryOptions().map((c) => (
+                <Pressable
+                  key={c.iso}
+                  style={({ pressed }) => [
+                    styles.langRow,
+                    country === c.iso && styles.langRowActive,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={async () => {
+                    await changeCountry(c.iso);
+                  }}
+                >
+                  <Text style={styles.langRowText}>
+                    {flagEmoji(c.iso)}  {c.name}
+                  </Text>
+                  <Text style={{ color: PALETTE.muted }}>{c.ambulance}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            <Pressable
+              style={({ pressed }) => [styles.btnPrimary, { marginTop: 12 }, pressed && styles.pressed]}
+              onPress={() => setPickerOpen(false)}
+            >
+              <Text style={styles.btnPrimaryText}>✓</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -384,14 +415,15 @@ function Actions({ verdict }: { verdict: Verdict }) {
     );
   }
   const isDanger = verdict.level === DangerLevel.DANGEROUS;
+  const amb = { ambulance: ambulanceNumber() };
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>🩹 {isDanger ? fa.titleNow : fa.titleIfBitten}</Text>
-      <Text style={styles.emphasis}>{isDanger ? fa.emphasisDanger : fa.emphasisCaution}</Text>
+      <Text style={styles.emphasis}>{fmt(isDanger ? fa.emphasisDanger : fa.emphasisCaution, amb)}</Text>
       <Text style={[styles.listHead, { color: PALETTE.green }]}>{fa.doLabel}</Text>
       {fa.do.map((step, i) => (
         <Text key={i} style={styles.bullet}>
-          <Text style={{ color: PALETTE.green }}>✓</Text>  {step}
+          <Text style={{ color: PALETTE.green }}>✓</Text>  {fmt(step, amb)}
         </Text>
       ))}
       <Text style={[styles.listHead, { color: PALETTE.red }]}>{fa.dontLabel}</Text>
@@ -619,4 +651,5 @@ const styles = StyleSheet.create({
   },
   langRowActive: { backgroundColor: PALETTE.greenSoft },
   langRowText: { fontSize: 16, color: PALETTE.ink, fontWeight: "600" },
+  countryList: { maxHeight: 260 },
 });
