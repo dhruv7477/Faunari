@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,18 +12,14 @@ import {
   View,
 } from "react-native";
 
-import {
-  DANGEROUS_FIRST_AID,
-  DISCLAIMER,
-  EMERGENCY,
-  LOW_RISK_NOTE,
-} from "../safety/content";
 import { DangerLevel, ScreenResult, Verdict } from "../safety/types";
 import { createScreener } from "../screener/createScreener";
 import { MockScreener, Screener } from "../screener/screener";
 import { buildFeedbackRecord } from "../feedback/record";
 import { createFeedbackStore, syncFeedback } from "../feedback/createFeedback";
 import { FeedbackSink, UserClaim } from "../feedback/types";
+import { availableLocales, fmt, isReviewed, s } from "../i18n";
+import { useLocale } from "../i18n/LocaleContext";
 
 const APP_VERSION = "0.1.0";
 
@@ -43,22 +40,31 @@ const PALETTE = {
   greenSoft: "#E9F4EE",
 };
 
-const BAND = {
-  [DangerLevel.DANGEROUS]: { fg: PALETTE.red, soft: PALETTE.redSoft, label: "High risk" },
-  [DangerLevel.CAUTION]: { fg: PALETTE.amber, soft: PALETTE.amberSoft, label: "Caution" },
-  [DangerLevel.UNIDENTIFIED]: { fg: PALETTE.amber, soft: PALETTE.amberSoft, label: "Not recognised" },
-  [DangerLevel.LOW_RISK]: { fg: PALETTE.green, soft: PALETTE.greenSoft, label: "Lower risk" },
-} as const;
+function bandFor(level: DangerLevel): { fg: string; soft: string; label: string } {
+  const v = s().verdict;
+  switch (level) {
+    case DangerLevel.DANGEROUS:
+      return { fg: PALETTE.red, soft: PALETTE.redSoft, label: v.dangerous.label };
+    case DangerLevel.CAUTION:
+      return { fg: PALETTE.amber, soft: PALETTE.amberSoft, label: v.caution.label };
+    case DangerLevel.UNIDENTIFIED:
+      return { fg: PALETTE.amber, soft: PALETTE.amberSoft, label: v.unidentified.label };
+    case DangerLevel.LOW_RISK:
+      return { fg: PALETTE.green, soft: PALETTE.greenSoft, label: v.lowRisk.label };
+  }
+}
 
 export default function HomeScreen() {
   // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
   const screenerRef = useRef<Screener>(new MockScreener());
   const feedbackRef = useRef<FeedbackSink>(createFeedbackStore());
+  const { locale, changeLocale, needsRestart } = useLocale();
   const [mode, setMode] = useState<"onnx" | "mock">("mock");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +109,7 @@ export default function HomeScreen() {
     }
   };
 
+  const t = s();
   return (
     <ScrollView style={styles.page} contentContainerStyle={styles.content} bounces={false}>
       <StatusBar style="light" />
@@ -111,11 +118,24 @@ export default function HomeScreen() {
         <View style={styles.brandRow}>
           <Image source={require("../../assets/logo.png")} style={styles.logo} />
           <Text style={styles.brand}>Faunari</Text>
+          <Pressable style={styles.langBtn} onPress={() => setPickerOpen(true)}>
+            <Text style={styles.langBtnText}>🌐</Text>
+          </Pressable>
         </View>
-        <Text style={styles.tagline}>Spot it. Know it. Stay safe.</Text>
+        <Text style={styles.tagline}>{t.app.tagline}</Text>
         {mode === "mock" && (
           <View style={styles.demoPill}>
-            <Text style={styles.demoPillText}>Demo mode — sample verdicts for testing</Text>
+            <Text style={styles.demoPillText}>{t.app.demoMode}</Text>
+          </View>
+        )}
+        {locale !== "en" && !isReviewed(locale) && (
+          <View style={styles.demoPill}>
+            <Text style={styles.demoPillText}>⚠︎ {t.app.machineTranslated}</Text>
+          </View>
+        )}
+        {needsRestart && (
+          <View style={styles.demoPill}>
+            <Text style={styles.demoPillText}>↻ Close and reopen the app to apply the layout direction</Text>
           </View>
         )}
       </View>
@@ -127,30 +147,27 @@ export default function HomeScreen() {
         >
           <Text style={styles.emergencyIcon}>🚑</Text>
           <View style={{ flex: 1 }}>
-            <Text style={styles.emergencyTitle}>Was someone bitten?</Text>
-            <Text style={styles.emergencySub}>Tap for emergency first-aid</Text>
+            <Text style={styles.emergencyTitle}>{t.home.emergencyTitle}</Text>
+            <Text style={styles.emergencySub}>{t.home.emergencySub}</Text>
           </View>
           <Text style={styles.emergencyChevron}>{emergencyOpen ? "▴" : "▾"}</Text>
         </Pressable>
 
         {emergencyOpen && (
           <View style={[styles.card, { borderColor: PALETTE.red, borderWidth: 1 }]}>
-            <Text style={[styles.cardTitle, { color: PALETTE.red }]}>{EMERGENCY.headline}</Text>
-            {EMERGENCY.steps.map((s, i) => (
+            <Text style={[styles.cardTitle, { color: PALETTE.red }]}>{t.emergency.headline}</Text>
+            {t.emergency.steps.map((step, i) => (
               <Text key={i} style={styles.bullet}>
-                <Text style={{ color: PALETTE.red }}>●</Text>  {s}
+                <Text style={{ color: PALETTE.red }}>●</Text>  {step}
               </Text>
             ))}
           </View>
         )}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Check a snake</Text>
+          <Text style={styles.cardTitle}>{t.home.checkTitle}</Text>
           <View style={styles.hintChip}>
-            <Text style={styles.hintChipText}>
-              📏 Stay well back and zoom in — never move closer for a better photo. After shooting,
-              crop tightly around the snake so it fills the frame.
-            </Text>
+            <Text style={styles.hintChipText}>{t.home.hint}</Text>
           </View>
 
           {imageUri ? (
@@ -159,14 +176,14 @@ export default function HomeScreen() {
               {loading && (
                 <View style={styles.previewOverlay}>
                   <ActivityIndicator size="large" color="#fff" />
-                  <Text style={styles.previewOverlayText}>Checking the photo…</Text>
+                  <Text style={styles.previewOverlayText}>{t.home.analyzing}</Text>
                 </View>
               )}
             </View>
           ) : (
             <View style={styles.dropZone}>
               <Text style={styles.dropZoneEmoji}>📷</Text>
-              <Text style={styles.dropZoneText}>Your photo appears here</Text>
+              <Text style={styles.dropZoneText}>{t.home.dropZone}</Text>
             </View>
           )}
 
@@ -175,13 +192,13 @@ export default function HomeScreen() {
               style={({ pressed }) => [styles.btnPrimary, pressed && styles.pressed]}
               onPress={() => pick(true)}
             >
-              <Text style={styles.btnPrimaryText}>📷  Take photo</Text>
+              <Text style={styles.btnPrimaryText}>{t.home.takePhoto}</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [styles.btnSecondary, pressed && styles.pressed]}
               onPress={() => pick(false)}
             >
-              <Text style={styles.btnSecondaryText}>Upload</Text>
+              <Text style={styles.btnSecondaryText}>{t.home.upload}</Text>
             </Pressable>
           </View>
         </View>
@@ -190,8 +207,33 @@ export default function HomeScreen() {
           <Result result={result} imageUri={imageUri} sink={feedbackRef.current} />
         )}
 
-        <Text style={[styles.disclaimer, { marginTop: "auto" }]}>{DISCLAIMER}</Text>
+        <Text style={[styles.disclaimer, { marginTop: "auto" }]}>{t.disclaimer}</Text>
       </View>
+
+      <Modal visible={pickerOpen} animationType="slide" transparent>
+        <View style={styles.pickerBackdrop}>
+          <View style={styles.pickerSheet}>
+            <Text style={styles.cardTitle}>🌐 {t.app.language}</Text>
+            {availableLocales().map((l) => (
+              <Pressable
+                key={l.code}
+                style={({ pressed }) => [
+                  styles.langRow,
+                  locale === l.code && styles.langRowActive,
+                  pressed && styles.pressed,
+                ]}
+                onPress={async () => {
+                  await changeLocale(l.code);
+                  setPickerOpen(false);
+                }}
+              >
+                <Text style={styles.langRowText}>{l.nativeName}</Text>
+                {locale === l.code && <Text style={{ color: PALETTE.green }}>✓</Text>}
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -206,7 +248,7 @@ function Result({
   sink: FeedbackSink;
 }) {
   const v = result.verdict;
-  const band = BAND[v.level];
+  const band = bandFor(v.level);
   return (
     <View>
       <View style={[styles.verdict, { backgroundColor: band.soft }]}>
@@ -228,6 +270,30 @@ function Result({
   );
 }
 
+function Confidence({ result, color }: { result: ScreenResult; color: string }) {
+  const c = s().confidence;
+  if (result.prediction === null) {
+    return <Text style={styles.confidenceCaption}>{c.ood}</Text>;
+  }
+  const p = result.verdict.venomProbability ?? 0;
+  const pct = Math.round(p * 100);
+  const lvl = result.verdict.level;
+  const text =
+    lvl === DangerLevel.DANGEROUS
+      ? fmt(c.dangerous, { pct })
+      : lvl === DangerLevel.CAUTION
+        ? fmt(c.caution, { pct })
+        : fmt(c.lowRisk, { pct });
+  return (
+    <View style={{ marginTop: 12 }}>
+      <View style={styles.meterTrack}>
+        <View style={[styles.meterFill, { width: `${Math.max(pct, 4)}%`, backgroundColor: color }]} />
+      </View>
+      <Text style={styles.confidenceCaption}>{text}</Text>
+    </View>
+  );
+}
+
 function FeedbackPrompt({
   result,
   imageUri,
@@ -238,6 +304,7 @@ function FeedbackPrompt({
   sink: FeedbackSink;
 }) {
   const [step, setStep] = useState<"ask" | "dispute" | "done">("ask");
+  const f = s().feedback;
 
   const send = async (claim: UserClaim) => {
     setStep("done"); // optimistic — a dropped feedback should never block the user
@@ -252,7 +319,7 @@ function FeedbackPrompt({
   if (step === "done") {
     return (
       <View style={styles.feedbackCard}>
-        <Text style={styles.feedbackThanks}>🙏 Thanks — your feedback helps Faunari improve.</Text>
+        <Text style={styles.feedbackThanks}>{f.thanks}</Text>
       </View>
     );
   }
@@ -260,20 +327,20 @@ function FeedbackPrompt({
   if (step === "dispute") {
     return (
       <View style={styles.feedbackCard}>
-        <Text style={styles.feedbackQ}>What was it, really?</Text>
-        <FeedbackBtn label="It was actually harmless" onPress={() => send("actually_harmless")} />
-        <FeedbackBtn label="It was actually dangerous" onPress={() => send("actually_dangerous")} />
-        <FeedbackBtn label="It wasn't a snake" onPress={() => send("not_a_snake")} />
+        <Text style={styles.feedbackQ}>{f.disputeQ}</Text>
+        <FeedbackBtn label={f.harmless} onPress={() => send("actually_harmless")} />
+        <FeedbackBtn label={f.dangerous} onPress={() => send("actually_dangerous")} />
+        <FeedbackBtn label={f.notASnake} onPress={() => send("not_a_snake")} />
       </View>
     );
   }
 
   return (
     <View style={styles.feedbackCard}>
-      <Text style={styles.feedbackQ}>Was this helpful?</Text>
+      <Text style={styles.feedbackQ}>{f.ask}</Text>
       <View style={styles.feedbackRow}>
-        <FeedbackBtn label="👍  Looks right" onPress={() => send("agree")} grow />
-        <FeedbackBtn label="👎  Not quite" onPress={() => setStep("dispute")} grow />
+        <FeedbackBtn label={f.yes} onPress={() => send("agree")} grow />
+        <FeedbackBtn label={f.no} onPress={() => setStep("dispute")} grow />
       </View>
     </View>
   );
@@ -298,72 +365,39 @@ function FeedbackBtn({
   );
 }
 
-function Confidence({ result, color }: { result: ScreenResult; color: string }) {
-  if (result.prediction === null) {
-    return (
-      <Text style={styles.confidenceCaption}>
-        Faunari couldn't confirm an in-scope snake in this photo, so it isn't guessing.
-      </Text>
-    );
-  }
-  const p = result.verdict.venomProbability ?? 0;
-  const pct = Math.round(p * 100);
-  const lvl = result.verdict.level;
-  const text =
-    lvl === DangerLevel.DANGEROUS
-      ? `Faunari estimates a high (~${pct}%) chance this is venomous.`
-      : lvl === DangerLevel.CAUTION
-        ? `Faunari estimates ~${pct}% chance of venom — not a confident match, but not low enough to rule out. Treat it with caution.`
-        : `Faunari estimates a low (~${pct}%) chance of venom — but never treat any snake as safe.`;
-  return (
-    <View style={{ marginTop: 12 }}>
-      <View style={styles.meterTrack}>
-        <View style={[styles.meterFill, { width: `${Math.max(pct, 4)}%`, backgroundColor: color }]} />
-      </View>
-      <Text style={styles.confidenceCaption}>{text}</Text>
-    </View>
-  );
-}
-
 function Actions({ verdict }: { verdict: Verdict }) {
+  const fa = s().firstAid;
   if (verdict.level === DangerLevel.UNIDENTIFIED) {
     return (
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>What to do</Text>
-        <Text style={styles.bullet}>
-          📷 Re-shoot from a safe distance — zoom in, don't approach. If anyone was bitten, use the
-          emergency panel above.
-        </Text>
+        <Text style={styles.cardTitle}>{fa.whatToDo}</Text>
+        <Text style={styles.bullet}>{fa.oodAdvice}</Text>
       </View>
     );
   }
   if (!verdict.treatAsDangerous) {
     return (
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Good to know</Text>
-        <Text style={styles.bullet}>ℹ️ {LOW_RISK_NOTE}</Text>
+        <Text style={styles.cardTitle}>{fa.goodToKnow}</Text>
+        <Text style={styles.bullet}>ℹ️ {fa.lowRiskNote}</Text>
       </View>
     );
   }
   const isDanger = verdict.level === DangerLevel.DANGEROUS;
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>🩹 {isDanger ? "What to do now" : "If bitten"}</Text>
-      <Text style={styles.emphasis}>
-        {isDanger
-          ? `${EMERGENCY.headline} — call 102 / 108.`
-          : "Treat any snakebite as an emergency — get medical care immediately (102 / 108)."}
-      </Text>
-      <Text style={[styles.listHead, { color: PALETTE.green }]}>DO</Text>
-      {DANGEROUS_FIRST_AID.do.map((s, i) => (
+      <Text style={styles.cardTitle}>🩹 {isDanger ? fa.titleNow : fa.titleIfBitten}</Text>
+      <Text style={styles.emphasis}>{isDanger ? fa.emphasisDanger : fa.emphasisCaution}</Text>
+      <Text style={[styles.listHead, { color: PALETTE.green }]}>{fa.doLabel}</Text>
+      {fa.do.map((step, i) => (
         <Text key={i} style={styles.bullet}>
-          <Text style={{ color: PALETTE.green }}>✓</Text>  {s}
+          <Text style={{ color: PALETTE.green }}>✓</Text>  {step}
         </Text>
       ))}
-      <Text style={[styles.listHead, { color: PALETTE.red }]}>DON'T</Text>
-      {DANGEROUS_FIRST_AID.dont.map((s, i) => (
+      <Text style={[styles.listHead, { color: PALETTE.red }]}>{fa.dontLabel}</Text>
+      {fa.dont.map((step, i) => (
         <Text key={i} style={styles.bullet}>
-          <Text style={{ color: PALETTE.red }}>✗</Text>  {s}
+          <Text style={{ color: PALETTE.red }}>✗</Text>  {step}
         </Text>
       ))}
     </View>
@@ -382,7 +416,16 @@ const styles = StyleSheet.create({
   },
   brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   logo: { width: 44, height: 44 },
-  brand: { fontSize: 32, fontWeight: "800", color: "#FFFFFF", letterSpacing: 0.3 },
+  brand: { fontSize: 32, fontWeight: "800", color: "#FFFFFF", letterSpacing: 0.3, flex: 1 },
+  langBtn: {
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderRadius: 999,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  langBtnText: { fontSize: 20 },
   tagline: { color: "#BCD3C3", marginTop: 3, fontSize: 14.5 },
   demoPill: {
     alignSelf: "flex-start",
@@ -411,8 +454,8 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: PALETTE.card,
     borderRadius: 16,
-    borderLeftWidth: 5,
-    borderLeftColor: PALETTE.red,
+    borderStartWidth: 5,
+    borderStartColor: PALETTE.red,
     padding: 14,
     elevation: 2,
     shadowColor: "#000",
@@ -553,4 +596,27 @@ const styles = StyleSheet.create({
   },
   feedbackBtnText: { color: PALETTE.ink, fontWeight: "600", fontSize: 14 },
   feedbackThanks: { color: PALETTE.green, fontWeight: "600", fontSize: 14 },
+
+  pickerBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+  },
+  pickerSheet: {
+    backgroundColor: PALETTE.card,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 34,
+  },
+  langRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 13,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  langRowActive: { backgroundColor: PALETTE.greenSoft },
+  langRowText: { fontSize: 16, color: PALETTE.ink, fontWeight: "600" },
 });

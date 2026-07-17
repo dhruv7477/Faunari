@@ -1,12 +1,15 @@
 import { SafeAreaView, StyleSheet } from "react-native";
 
+import { LocaleProvider } from "./src/i18n/LocaleContext";
 import HomeScreen from "./src/screens/HomeScreen";
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.root}>
-      <HomeScreen />
-    </SafeAreaView>
+    <LocaleProvider>
+      <SafeAreaView style={styles.root}>
+        <HomeScreen />
+      </SafeAreaView>
+    </LocaleProvider>
   );
 }
 
