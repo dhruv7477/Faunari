@@ -229,6 +229,7 @@ data/**/*.tar.gz
 *.pt
 *.onnx
 *.onnx.data
+*.apk
 dist/
 
 # Derived / regenerable data artifacts — the pipeline recreates these. Kept (tracked): the canonical
