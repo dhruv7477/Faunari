@@ -1,0 +1,25 @@
+name: Feedback trigger
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # every 6 hours
+  workflow_dispatch: {} # manual runs for testing
+
+permissions:
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install requests google-auth
+      - name: Count feedback and open review issue at each threshold
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FEEDBACK_THRESHOLD: "5" # validation setting; raise to 100 once the loop is proven
+        run: python scripts/check_feedback_trigger.py
