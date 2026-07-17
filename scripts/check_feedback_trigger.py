@@ -30,7 +30,10 @@ FIRESTORE_URL = (
 
 def firestore_feedback_count() -> int:
     """Total documents in the feedback collection, via an aggregation COUNT (cheap, no doc reads)."""
-    info = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"])
+    raw = os.environ.get("FIREBASE_SERVICE_ACCOUNT", "").strip().lstrip("﻿")  # BOM from shell piping
+    if not raw:
+        raise SystemExit("FIREBASE_SERVICE_ACCOUNT secret is empty or unset — re-set it from the key JSON")
+    info = json.loads(raw)
     creds = service_account.Credentials.from_service_account_info(
         info, scopes=["https://www.googleapis.com/auth/datastore"]
     )
