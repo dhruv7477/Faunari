@@ -5,11 +5,13 @@
 // Adding a language = adding one file to strings/ and one entry to LOCALES. No other code changes.
 import { Strings, en } from "./strings/en";
 import { ar } from "./strings/ar";
+import { bn } from "./strings/bn";
 import { hi } from "./strings/hi";
 import { ta } from "./strings/ta";
+import { te } from "./strings/te";
 import { ur } from "./strings/ur";
 
-export const LOCALES: Record<string, Strings> = { en, hi, ta, ar, ur };
+export const LOCALES: Record<string, Strings> = { en, hi, bn, te, ta, ar, ur };
 
 export const DEFAULT_LOCALE = "en";
 
