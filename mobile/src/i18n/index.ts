@@ -16,12 +16,14 @@ import { ml } from "./strings/ml";
 import { mr } from "./strings/mr";
 import { pa } from "./strings/pa";
 import { pt } from "./strings/pt";
+import { sw } from "./strings/sw";
 import { ta } from "./strings/ta";
 import { te } from "./strings/te";
 import { ur } from "./strings/ur";
+import { zh } from "./strings/zh";
 
 export const LOCALES: Record<string, Strings> = {
-  en, hi, bn, te, mr, ta, gu, kn, ml, pa, ar, ur, es, pt, fr, id,
+  en, hi, bn, te, mr, ta, gu, kn, ml, pa, ar, ur, es, pt, fr, id, zh, sw,
 };
 
 export const DEFAULT_LOCALE = "en";
