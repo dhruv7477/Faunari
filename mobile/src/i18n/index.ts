@@ -11,11 +11,12 @@ import { hi } from "./strings/hi";
 import { kn } from "./strings/kn";
 import { ml } from "./strings/ml";
 import { mr } from "./strings/mr";
+import { pa } from "./strings/pa";
 import { ta } from "./strings/ta";
 import { te } from "./strings/te";
 import { ur } from "./strings/ur";
 
-export const LOCALES: Record<string, Strings> = { en, hi, bn, te, mr, ta, gu, kn, ml, ar, ur };
+export const LOCALES: Record<string, Strings> = { en, hi, bn, te, mr, ta, gu, kn, ml, pa, ar, ur };
 
 export const DEFAULT_LOCALE = "en";
 
