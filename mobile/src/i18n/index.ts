@@ -7,11 +7,13 @@ import { Strings, en } from "./strings/en";
 import { ar } from "./strings/ar";
 import { bn } from "./strings/bn";
 import { hi } from "./strings/hi";
+import { kn } from "./strings/kn";
+import { mr } from "./strings/mr";
 import { ta } from "./strings/ta";
 import { te } from "./strings/te";
 import { ur } from "./strings/ur";
 
-export const LOCALES: Record<string, Strings> = { en, hi, bn, te, ta, ar, ur };
+export const LOCALES: Record<string, Strings> = { en, hi, bn, te, mr, ta, kn, ar, ur };
 
 export const DEFAULT_LOCALE = "en";
 
