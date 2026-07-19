@@ -70,6 +70,8 @@ and treat any snakebite as a medical emergency — call 102 / 108 (India) immedi
   (model improvement), not shared with third parties.
 - **App interactions** (the verdict shown, confidence numbers): same as above.
 - **No** account creation; identifiers are anonymous.
+- **Location: NOT collected** — the optional location permission resolves the local emergency
+  number against a map bundled in the app, entirely on-device; coordinates never leave the phone.
 - Data **encrypted in transit** (HTTPS); deletion available on request (email).
 
 ## Content rating questionnaire

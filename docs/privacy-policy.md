@@ -1,6 +1,6 @@
 # Faunari — Privacy Policy
 
-_Last updated: 17 July 2026_
+_Last updated: 18 July 2026_
 
 Faunari is a safety-first app that helps people judge whether a snake in a photo may be dangerous.
 This policy explains what data the app handles and what happens to it.
@@ -38,6 +38,10 @@ If you never tap a feedback button, the app uploads nothing.
 
 - **Camera** — to photograph a snake from a safe distance. Used only when you tap "Take photo".
 - **Photo library access** — to let you analyse a photo you already took.
+- **Location (optional)** — only if you tap "Use my current location", to select the correct
+  emergency phone number for the country you are in. Your position is matched against a map
+  **bundled inside the app, entirely on your phone** — coordinates are never uploaded, stored
+  remotely, or attached to feedback. You can always pick your country manually instead.
 
 ## Data retention & deletion
 

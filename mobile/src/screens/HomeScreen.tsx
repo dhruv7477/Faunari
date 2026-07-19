@@ -22,7 +22,7 @@ import { availableLocales, fmt, isReviewed, s } from "../i18n";
 import { ambulanceNumber, countryOptions, flagEmoji } from "../i18n/emergency";
 import { useLocale } from "../i18n/LocaleContext";
 
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.2.0";
 
 const PALETTE = {
   forest: "#123524",
