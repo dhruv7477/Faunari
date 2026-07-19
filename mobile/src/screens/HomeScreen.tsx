@@ -22,7 +22,7 @@ import { availableLocales, fmt, isReviewed, s } from "../i18n";
 import { ambulanceNumber, countryOptions, flagEmoji } from "../i18n/emergency";
 import { useLocale } from "../i18n/LocaleContext";
 
-const APP_VERSION = "0.2.0";
+const APP_VERSION = "0.2.1";
 
 const PALETTE = {
   forest: "#123524",
@@ -216,22 +216,24 @@ export default function HomeScreen() {
         <View style={styles.pickerBackdrop}>
           <View style={styles.pickerSheet}>
             <Text style={styles.cardTitle}>🌐 {t.app.language}</Text>
-            {availableLocales().map((l) => (
-              <Pressable
-                key={l.code}
-                style={({ pressed }) => [
-                  styles.langRow,
-                  locale === l.code && styles.langRowActive,
-                  pressed && styles.pressed,
-                ]}
-                onPress={async () => {
-                  await changeLocale(l.code);
-                }}
-              >
-                <Text style={styles.langRowText}>{l.nativeName}</Text>
-                {locale === l.code && <Text style={{ color: PALETTE.green }}>✓</Text>}
-              </Pressable>
-            ))}
+            <ScrollView style={styles.langList} nestedScrollEnabled>
+              {availableLocales().map((l) => (
+                <Pressable
+                  key={l.code}
+                  style={({ pressed }) => [
+                    styles.langRow,
+                    locale === l.code && styles.langRowActive,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={async () => {
+                    await changeLocale(l.code);
+                  }}
+                >
+                  <Text style={styles.langRowText}>{l.nativeName}</Text>
+                  {locale === l.code && <Text style={{ color: PALETTE.green }}>✓</Text>}
+                </Pressable>
+              ))}
+            </ScrollView>
 
             <Text style={[styles.cardTitle, { marginTop: 16 }]}>
               🚑 {flagEmoji(country ?? "")} {ambulanceNumber()}
@@ -654,7 +656,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 34,
+    maxHeight: "88%", // sheet itself never outgrows the screen; inner lists scroll
   },
+  langList: { maxHeight: 230 },
   langRow: {
     flexDirection: "row",
     justifyContent: "space-between",

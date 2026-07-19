@@ -2,7 +2,7 @@
   "expo": {
     "name": "Faunari",
     "slug": "faunari",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
@@ -16,7 +16,7 @@
     ],
     "android": {
       "package": "com.faunari.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO"
       ],
