@@ -19,15 +19,20 @@
     "expo-file-system": "~18.0.4",
     "expo-image-manipulator": "~13.0.5",
     "expo-image-picker": "~16.0.0",
+    "expo-localization": "~16.0.1",
+    "expo-location": "~18.0.10",
     "expo-status-bar": "~2.0.0",
     "firebase": "^12.16.0",
     "jpeg-js": "^0.4.4",
     "onnxruntime-react-native": "^1.20.1",
     "react": "18.3.1",
-    "react-native": "0.76.9"
+    "react-native": "0.76.9",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@types/react": "~18.3.12",
+    "@types/topojson-client": "^3.1.5",
     "patch-package": "^8.0.1",
     "typescript": "~5.3.3",
     "vitest": "^2.1.9"

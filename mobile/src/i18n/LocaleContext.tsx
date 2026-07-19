@@ -16,6 +16,8 @@ interface LocaleCtx {
   changeLocale: (code: string) => Promise<void>;
   country: string | null; // ISO code; null -> auto (device region / 112 fallback)
   changeCountry: (iso: string) => Promise<void>;
+  /** GPS + offline map: asks for location permission if needed; returns the ISO found or null. */
+  locateCountry: () => Promise<string | null>;
   needsRestart: boolean; // true when the RTL direction changed and a reopen is required
 }
 
@@ -24,6 +26,7 @@ const Ctx = createContext<LocaleCtx>({
   changeLocale: async () => undefined,
   country: null,
   changeCountry: async () => undefined,
+  locateCountry: async () => null,
   needsRestart: false,
 });
 
@@ -34,6 +37,7 @@ export function useLocale(): LocaleCtx {
 interface Saved {
   locale?: string;
   country?: string;
+  countrySource?: "manual" | "auto"; // manual choices are never overridden by GPS refreshes
 }
 
 async function loadSettings(): Promise<Saved> {
@@ -65,6 +69,27 @@ function applyRTL(code: string): boolean {
   return false;
 }
 
+/** GPS coords -> country via the bundled offline map. `request` controls whether we may prompt
+ *  for permission (true from the picker button; false for silent cold-start refreshes). */
+async function gpsCountry(request: boolean): Promise<string | null> {
+  try {
+    const Location = await import("expo-location"); // lazy: native module, absent in Expo Go tests
+    const perm = request
+      ? await Location.requestForegroundPermissionsAsync()
+      : await Location.getForegroundPermissionsAsync();
+    if (!perm.granted) return null;
+    // Last known fix is instant and country-accurate; fall back to a fresh coarse fix.
+    const pos =
+      (await Location.getLastKnownPositionAsync()) ??
+      (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Lowest }));
+    if (!pos) return null;
+    const { countryFromCoords } = await import("./geo");
+    return countryFromCoords(pos.coords.latitude, pos.coords.longitude);
+  } catch {
+    return null; // no GPS, no permission, Expo Go — the fallback chain covers it
+  }
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState(getLocale());
   const [country, setCountryState] = useState<string | null>(getCountry());
@@ -72,7 +97,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    loadSettings().then((saved) => {
+    loadSettings().then(async (saved) => {
       if (cancelled) return;
       const code = saved.locale ?? detectDeviceLocale();
       setLocale(code);
@@ -81,6 +106,16 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       const iso = saved.country ?? detectDeviceRegion();
       setCountry(iso);
       setCountryState(iso);
+      // Travelers: silently refresh from GPS when permission was already granted — but never
+      // override a country the user picked by hand.
+      if (saved.countrySource !== "manual") {
+        const located = await gpsCountry(false);
+        if (!cancelled && located && located !== iso) {
+          setCountry(located);
+          setCountryState(located);
+          await saveSettings({ country: located, countrySource: "auto" });
+        }
+      }
     });
     return () => {
       cancelled = true;
@@ -97,11 +132,21 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const changeCountry = async (iso: string) => {
     setCountry(iso);
     setCountryState(iso);
-    await saveSettings({ country: iso });
+    await saveSettings({ country: iso, countrySource: "manual" });
+  };
+
+  const locateCountry = async () => {
+    const located = await gpsCountry(true);
+    if (located) {
+      setCountry(located);
+      setCountryState(located);
+      await saveSettings({ country: located, countrySource: "auto" });
+    }
+    return located;
   };
 
   return (
-    <Ctx.Provider value={{ locale, changeLocale, country, changeCountry, needsRestart }}>
+    <Ctx.Provider value={{ locale, changeLocale, country, changeCountry, locateCountry, needsRestart }}>
       {children}
     </Ctx.Provider>
   );

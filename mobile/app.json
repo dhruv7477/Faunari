@@ -17,7 +17,9 @@
     "android": {
       "package": "com.faunari.app",
       "versionCode": 1,
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#123524"
@@ -57,7 +59,8 @@
           }
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-localization"
     ],
     "extra": {
       "eas": {

@@ -59,7 +59,8 @@ export default function HomeScreen() {
   // Start with the mock so the UI is instantly usable; swap in the on-device screener once loaded.
   const screenerRef = useRef<Screener>(new MockScreener());
   const feedbackRef = useRef<FeedbackSink>(createFeedbackStore());
-  const { locale, changeLocale, country, changeCountry, needsRestart } = useLocale();
+  const { locale, changeLocale, country, changeCountry, locateCountry, needsRestart } = useLocale();
+  const [locating, setLocating] = useState(false);
   const [mode, setMode] = useState<"onnx" | "mock">("mock");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [result, setResult] = useState<ScreenResult | null>(null);
@@ -235,6 +236,19 @@ export default function HomeScreen() {
             <Text style={[styles.cardTitle, { marginTop: 16 }]}>
               🚑 {flagEmoji(country ?? "")} {ambulanceNumber()}
             </Text>
+            <Pressable
+              style={({ pressed }) => [styles.langRow, pressed && styles.pressed]}
+              onPress={async () => {
+                setLocating(true);
+                try {
+                  await locateCountry();
+                } finally {
+                  setLocating(false);
+                }
+              }}
+            >
+              <Text style={styles.langRowText}>📍 {locating ? "…" : "Use my current location"}</Text>
+            </Pressable>
             <ScrollView style={styles.countryList} nestedScrollEnabled>
               {countryOptions().map((c) => (
                 <Pressable
